@@ -26,7 +26,7 @@ export const password = body('password')
 export const name = body('name')
   .trim()
   .notEmpty()
-  .withMessage('비밀번호는 필수 항목입니다')
+  .withMessage('이름은 필수 항목입니다')
   .bail()
   .matches(/^[가-힣]{2,30}$/)
   .withMessage('한글 2~30글자 허용');
