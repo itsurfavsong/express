@@ -1,7 +1,13 @@
 // 기본적인 router 형태
-import express, { response } from 'express'; // express 모듈 가져오기, express 함수 가져오기
+import express from 'express'; // express 모듈 가져오기, express 함수 가져오기
+import authRouter from './routes/auth.router.js';
+import usersRouter from './routes/users.router.js';
+import { eduTest, eduUsersTest } from './app/middlewares/edu/edu.middleware.js';
 
 const app = express();
+app.use(express.json()); // Json으로 요청이 올 경우 파싱 처리
+// get Middleware set
+app.use(eduTest); // 커스텀 미들웨어 **전역으로 등록**
 
 // 클라이언트가 '/' 경로로 GET 요청을 보낼 때 실행되는 Router
 app.get('/', (request, response, next) => {
@@ -37,6 +43,7 @@ app.get('/api/posts', (request, response, next) => {
 });
 
 // Segment Parameter
+// 단순 몇개 안되는 1-2개 정도의 값만 필요하면 세그먼트 ㄱ
 // 도메인과 도메인을 제외한 부분에서 특정한 경로가 파라미터로써 쓸 경우가 있다.
 // 'Request.params'를 통해서 접근 가능
 app.get('/api/posts/:id', (request, response, next) => {
@@ -45,12 +52,38 @@ app.get('/api/posts/:id', (request, response, next) => {
   response.status(200).send(postId);
 })
 ;
-// --------------------------------
 
-// 대체 라우트 (정의할 라우터를 다 쓰고 가장 마지막에 쓴다/미들웨어랑 관련이 있다.)
+// JSON 요청 제어
+// 인스턴스 -> const form = new FormData();
+// 추가해줘야되는 점이 있다.
+// 데이터가 많아진다? 그러면 json으로 받는다.
+// 'Request.body'를 통해서 접근 가능 (** express.json() 추가 필요 **)
+app.post('/api/hi', (request, response, next) => {
+  const {account, password, name} = request.body;
+  // const account = request.body.account; 하나하나 다 받아와도 되고 district 형태로 받아와도 괜찮다.
+  response.status(200).send({account, password, name})
+});
+
+// --------------------------
+// 라우트 그룹 (개발자 마음)
+// --------------------------
+// 유지보수를 위해 각 기능별로 나눈다
+// 라우트를 모듈로 나누고 그룹핑하여 관리하는 곳이다.
+app.use('/api', authRouter);
+// '/api' 여기에서 설정해둔다는 뜻은 authRouter 관련된 것들은 다 '/api' 이 주소를 가져온다는 뜻이다.
+// 기능명까지 prefix로 들고 올 수 있다.
+
+app.use('/api/users', eduUsersTest, usersRouter);
+// 만약 uesrsRouter에 모든 라우터들이 미들웨어를 쓴다? 그러면 여기다가 추가 할 수 있음
+
+// --------------------------------
+// 대체 라우트 (정의할 라우터를 다 쓰고 **가장 마지막**에 쓴다/미들웨어랑 관련이 있다.)
 app.use((request, response, next) => {
-  response.status(404).send('찾을 수 없는 페이지 입니다.');
-})
+  response.status(404).send({
+    code: 'E01'
+    , msg: '찾을 수 없는 페이지 입니다.'
+  });
+});
 
 // 서버를 주어진 포트에서 시작 (유저의 요청을 기다리겠다.)
 app.listen(3000, () => {
