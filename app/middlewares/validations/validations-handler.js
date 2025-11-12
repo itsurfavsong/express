@@ -7,7 +7,7 @@ export function validatorHandler(request, response, next) {
   const errors = validationResult(request);
 
   // 에러가 있으면 400과 함께 반환 (“비어 있지 않다 → 에러가 있다” 그리고 이 말은 true)
-  // formatWith는 JS에서 map 함수와 같다.
+  // formatWith는 JS의 map 함수와 같다.
   if (!errors.isEmpty()) {
     const customErrors = errors.formatWith(error => `${error.path}: ${error.msg}`);
     return response.status(400).send(customErrors.array());
