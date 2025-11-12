@@ -4,8 +4,6 @@ import db from '../app/models/index.js';
 
 const { sequelize, Employee } = db;
 
-console.log('DB 연결 확인:', sequelize instanceof Object); // true면 OK
-
 const usersRouter = express.Router(); // 라우터 객체 인스턴스를 반환
 
 usersRouter.get('/', (request, response, next) => {

@@ -76,9 +76,8 @@ const attributes = {
   createdAt: {
     field: 'created_at',
     // type: DataTypes.NOW, 혹은
-    type: DataTypes.DATE, // 이 놈이랑
+    type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: new Date(), // 이 놈
     comment: '작성일',
     get() {
       const val = this.getDataValue('createdAt');
@@ -91,9 +90,8 @@ const attributes = {
   updatedAt: {
     field: 'updated_at',
     // type: DataTypes.NOW, 혹은
-    type: DataTypes.DATE, // 이 놈이랑
+    type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: new Date(), // 이 놈
     comment: '수정일',
     get() {
       const val = this.getDataValue('createdAt');
@@ -106,9 +104,9 @@ const attributes = {
   deletedAt: {
     field: 'deleted_at',
     // type: DataTypes.NOW, 혹은
-    type: DataTypes.DATE, // 이 놈이랑
+    type: DataTypes.DATE,
     allowNull: false,
-    defaultValue: null, // 이 놈
+    defaultValue: null,
     comment: '삭제일',
     get() {
       const val = this.getDataValue('deletedAt');
