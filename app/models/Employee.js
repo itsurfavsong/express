@@ -105,7 +105,7 @@ const attributes = {
     field: 'deleted_at',
     // type: DataTypes.NOW, 혹은
     type: DataTypes.DATE,
-    allowNull: false,
+    allowNull: true,
     defaultValue: null,
     comment: '삭제일',
     get() {

@@ -4,6 +4,7 @@ import authRouter from './routes/auth.router.js';
 import usersRouter from './routes/users.router.js';
 import { eduTest, eduUsersTest } from './app/middlewares/edu/edu.middleware.js';
 import { errorHandler } from './app/middlewares/errors/error-handler.js';
+import eduRouter from './routes/edu.router.js';
 
 const app = express();
 app.use(express.json()); // Json으로 요청이 올 경우 파싱 처리
@@ -88,6 +89,9 @@ app.get('/error', (request, response, next) => {
   // 비동기 처리 내부에서는 반드시 **next(error)**를 이용해야 서버 crashed가 일어나지 않는다.
   next(new Error('예외 발생'));
 });
+
+app.use(eduRouter);
+
 
 // ----------------------------------------------------------------------------------------------------------------------------------
 // 대체 라우트 (정의할 라우터를 다 쓰고 **가장 마지막**에 쓴다/미들웨어랑 관련이 있다.)
