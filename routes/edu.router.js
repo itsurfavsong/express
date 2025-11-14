@@ -3,7 +3,7 @@ import db from '../app/models/index.js';
 import { Op } from 'sequelize';
 import dayjs from 'dayjs';
 
-const { sequelize, Employee } = db; // 우리가 만든 sequelize 변수임
+const { sequelize, Employee, TitleEmp, Title } = db; // 우리가 만든 sequelize 변수임
 
 const eduRouter = express.Router();
 
@@ -119,25 +119,28 @@ eduRouter.get('/api/edu', async (request, response, next) => {
     // ------------------------------------------------------------------------------------------------------------------------------------------------------------
     // 8. destroy(options) : 조건에 맞는 레코드 삭제
     // --------------------------------------------------------------------------------------------------------------------------------------------------------
-    result = await Employee.destroy({
-      where: {
-        empId: 100008
-      },
-      // paranoid: false, 여기서 안먹힘
-      force: true // hard delete는 이렇게 써야됨. 모델에 `paranoid: true`일 경우에도, 물리적 삭제를 위한 옵션.
-    });
+    // result = await Employee.destroy({
+    //   where: {
+    //     empId: 100008
+    //   },
+    //   // paranoid: false, 여기서 안먹힘
+    //   force: true // hard delete는 이렇게 써야됨. 모델에 `paranoid: true`일 경우에도, 물리적 삭제를 위한 옵션.
+    // });
+
+    // // -----------------------------------------------------------------------------------------------------------------------------------------
+    // // 9. restore(options) : Soft Delete 된 레코드를 복원
+    // // --------------------------------------------------------------------------------------------------------------------------------------------------------
+    // result = await Employee.restore(
+    //   {
+    //     where:{
+    //       empId: 100011
+    //     }
+    //   }
+    // );
 
     // --------------------------------------------------------------------------------------------
-    // 9. restore(options) : Soft Delete 된 레코드를 복원
-    // --------------------------------------------------------------------------------------------------------------------------------------------------------
-    result = await Employee.restore(
-      {
-        where:{
-          empId: 100011
-        }
-      }
-    );
-
+    // 예제 1번
+    // --------------------------------------------------------------------------------------------
     // 이름이 '강가람'이고 성별이 여자 또는, '신서연'인 사원 정보 조회
     // result = await Employee.findAll(
     //   {
@@ -154,69 +157,104 @@ eduRouter.get('/api/edu', async (request, response, next) => {
     //     } // and 생략가능함.
     //   }
     // );
+    // --------------------------------------------------------------------------------------------
+    // 예제 2번
+    // --------------------------------------------------------------------------------------------
     // 성별이 여자, 그리고 이름이 '강가람 OR '신서연'인 사원 정보 조회
-    result = await Employee.findAll(
-      {
-        attributes: ['empId', 'name', 'gender'],
-        where: {
-          gender: 'F' ,
-          [Op.or]: [
-            { name: '강가람' },
-            { name: '신서연' }
-          ]
-        } // 어차피 이 구문에서 ','으로만 해도 and가 들어간다. 그래서 [Op.and] 굳이 써줄 필요가 없다.
-      }
-    )
+    // result = await Employee.findAll(
+    //   {
+    //     attributes: ['empId', 'name', 'gender'],
+    //     where: {
+    //       gender: 'F' ,
+    //       [Op.or]: [
+    //         { name: '강가람' },
+    //         { name: '신서연' }
+    //       ]
+    //     } // 어차피 이 구문에서 ','으로만 해도 and가 들어간다. 그래서 [Op.and] 굳이 써줄 필요가 없다.
+    //   }
+    // )
 
-    result = await Employee.findAll({
-      where: {
-        // empId: {
-        //   // [Op.between]: [1, 100], 이의 반대로는 [Op.notBetween] 이렇게 쓸 수 있다.
-        //   [Op.in]: [1, 2, 3] // Op.notIn 이 1, 2, 3번 빼고 다 가지고 오고 Op.in은 반대이다.
-        // },
-        name: {
-          [Op.like]: '%가람' // 혹은 Op.iLike 는 대소문자 무시하고 검색한다.
-        },
-        fireAt: {
-          [Op.is]: null // 이의 반대는 [Op.not]: null 라는 형태로 쓸 수 있다.
-        }
-      }
-    });
+    // result = await Employee.findAll({
+    //   where: {
+    //     // empId: {
+    //     //   // [Op.between]: [1, 100], 이의 반대로는 [Op.notBetween] 이렇게 쓸 수 있다.
+    //     //   [Op.in]: [1, 2, 3] // Op.notIn 이 1, 2, 3번 빼고 다 가지고 오고 Op.in은 반대이다.
+    //     // },
+    //     name: {
+    //       [Op.like]: '%가람' // 혹은 Op.iLike 는 대소문자 무시하고 검색한다.
+    //     },
+    //     fireAt: {
+    //       [Op.is]: null // 이의 반대는 [Op.not]: null 라는 형태로 쓸 수 있다.
+    //     }
+    //   }
+    // });
 
-    // 로그 저장 처리
-    result = await Employee.findAll(
-      {
-        where: {
-          empId: {
-            [Op.gte]:10000
-          }
-        },
-        order: [
-          ['name', 'ASC'],
-          ['birth', 'DESC']
-
-        ],
-        limit: 10,
-        offset: 10
-      }
-    );
-
+    // // 로그 저장 처리
+    // result = await Employee.findAll(
+    //   {
+    //     where: {
+    //       empId: {
+    //         [Op.gte]:10000
+    //       }
+    //     },
+    //     order: [
+    //       ['name', 'ASC'],
+    //       ['birth', 'DESC']
+    //     ],
+    //     limit: 10,
+    //     offset: 10
+    //   }
+    // );
+    // --------------------------------------------------------------------------------------------
     // groupby, having
-    result = await Employee.findAll(
-      {
-        attributes: [
-          'gender'
-          , [sequelize.fn('COUNT', sequelize.col('*')), 'cnt_gender']
+    // --------------------------------------------------------------------------------------------
+    // result = await Employee.findAll(
+    //   {
+    //     attributes: [
+    //       'gender'
+    //       , [sequelize.fn('COUNT', sequelize.col('*')), 'cnt_gender']
+    //   ],
+    //     group: ['gender'],
+    //     having: sequelize.literal('cnt_gender >= 40000'),
+    //   }
+    // );
+    // --------------------------------------------------------------------------------------------
+    // join
+    // --------------------------------------------------------------------------------------------
+    result = await Employee.findOne({
+      attributes: ['empId', 'name'],
+      where: {
+        empId: 1
+      },
+      include: [
+        {
+          model: TitleEmp, // 내가 연결할 모델
+          as: 'emp-has-tle', // 내가 사용할 관계
+          required: true, // sequelize가 left outer join이 default값이라서 inner join으로 바꿔준다.
+          // rquired: true이면 inner join, false면 left outer join이다.
+          attributes: ['titleCode'],
+          where: {
+            endAt: {
+              [Op.is]: null
+            }
+          },
+          include: [
+            {
+              // model: Title,
+              // as: 'tle-belongs-to-tl',
+              association: 'tle-belongs-to-tl',
+              required: true,
+              attributes: ['title']
+            }
+          ]
+        }
       ],
-        group: ['gender'],
-        having: sequelize.literal('cnt_gender >= 40000'),
-      }
-    );
+    });
 
     return response.status(200).send(
       {
         msg: '정상 처리',
-        data: result
+        data: result // user한테는 json으로 보내야된다. 그래서 이전에 json으로 파싱해준다**
       }
     );
   } catch (error) {

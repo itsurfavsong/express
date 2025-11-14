@@ -94,7 +94,7 @@ const attributes = {
     allowNull: false,
     comment: '수정일',
     get() {
-      const val = this.getDataValue('createdAt');
+      const val = this.getDataValue('updatedAt');
       if(!val) {
         return null;
       }
@@ -125,9 +125,9 @@ const options = {
   tableName: 'employees', // 실제 테이블명
   timestamps: true, // createdAt, updatedAt 자동 관리 (2개 All)
   // createdAt: 'empCreatedAt', 혹여나 이름이 다르면 이런식으로 설정을 해주면 된다.
-  // updatedAt: false 이는 updatedAt만 따로 설정해주고 싶을 때
+  // updatedAt: false 이를 설정하면 updatedAt만 따로 설정해줄 수 있다.
   paranoid: true // Soft Delete 설정 (deletedAt 자동 관리) - ORM의 destroy(원래는 hard delete)를 성질을 update로 바뀌어버림.
-}
+};
 
 // 모델 객체 작성
 const Employee = {
@@ -135,6 +135,13 @@ const Employee = {
     const defineEmployee = sequelize.define(modelName, attributes, options);
 
     return defineEmployee;
+  },
+
+  // 모델 관계를 정의 (**여기선 부모 모델에서 설정**)
+  associate: (db) => {
+    // hasMany - 1:n 관계에서 설정하는 방법 (1명의 사원은 복수의 직급 정보를 가진다.)
+    // hasOne - 1:1 관계
+    db.Employee.hasMany(db.TitleEmp, {sourceKey: 'empId', foreignKey: 'empId', as: 'emp-has-tle' }); // sourceKey는 employee에서 가져온 거고 foreinKey는 titleemp 테이블에서 가져온 것.
   }
 };
 
